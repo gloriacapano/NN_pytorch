@@ -1,7 +1,7 @@
 # XOR function if x1 or x2 is 1 than XOR = 1
 # otherwise 0
 
-# NN
+# NN using Linear + ReLU
 
 import torch
 import torch.nn as nn
