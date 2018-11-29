@@ -18,10 +18,11 @@ Y = [[[0.0], [1.0], [1.0], [0.0]]]
 
 
 class Net(nn.Module):
-    def __init__(self):
+    def __init__(self, n_hidden):
         super(Net, self).__init__()
-        self.fc1 = nn.Linear(2, 10)  # 2 Input nodes, 10 in hidden num_layers
-        self.fc2 = nn.Linear(10,1) # 10 nodes in 1 hidden layer, 2 output nodes
+        self.n_hidden = n_hidden
+        self.fc1 = nn.Linear(2, n_hidden)  # 2 Input nodes, 10 in hidden num_layers
+        self.fc2 = nn.Linear(n_hidden,1) # 10 nodes in 1 hidden layer, 2 output nodes
         self.rl1 = nn.ReLU()
         self.rl2 = nn.ReLU()
 
@@ -58,7 +59,7 @@ def trainIters(net, X, n_epochs, print_every = 1000, plot_every = 100, lr=0.001,
     criterion = nn.MSELoss()
     optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.1)
 
-    loss_file = open('losses.txt', 'w')
+    loss_file = open('XOR_losses.txt', 'w')
     for epoch in range(n_epochs):
         for i, data in enumerate(X, 0):
             inputs = data
@@ -88,6 +89,7 @@ def trainIters(net, X, n_epochs, print_every = 1000, plot_every = 100, lr=0.001,
                 loss_file.write(str(plot_loss_avg)+'\n')
     showLoss(plot_losses)
     loss_file.close()
+    return plot_losses
 
 
 import matplotlib.pyplot as plt
@@ -98,12 +100,19 @@ import numpy as np
 def showLoss(points):
     fig, ax = plt.subplots()
     plt.plot(points)
-    plt.savefig("losses.png")
+    plt.savefig("XOR_losses.png")
 
 
+import os
+nodes_hidden = [2,4, 6, 8, 10, 20, 50]
+for nodes in nodes_hidden:
+    net = Net(nodes)
+    plot_loss = trainIters(net, X, 20000, print_every=1000, plot_every=100)
+    filename1 = "XOR_losses_"+str(nodes)+".png"
+    filename2 = "XOR_losses_"+str(nodes)+".txt"
+    os.rename("XOR_losses.png", filename1)
+    os.rename("XOR_losses.txt", filename2)
+    print(net(Variable(torch.FloatTensor(X[0]))))
 
-net = Net()
-trainIters(net, X, 75000, print_every=1000, plot_every=100)
 
 print('Finished Training')
-print(net(Variable(torch.FloatTensor(X[0]))))
